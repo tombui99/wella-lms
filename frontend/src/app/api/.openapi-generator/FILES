@@ -6,6 +6,7 @@ api/api.ts
 api/auth.service.ts
 api/courses.service.ts
 api/lessons.service.ts
+api/studentProgress.service.ts
 api/teacher.service.ts
 configuration.ts
 encoder.ts
@@ -14,9 +15,11 @@ index.ts
 model/apiCoursesIdGetIdParameter.ts
 model/applicationUser.ts
 model/course.ts
+model/courseProgressDto.ts
 model/createCourseDto.ts
 model/createLessonDto.ts
 model/lesson.ts
+model/lessonProgressDto.ts
 model/loginDto.ts
 model/models.ts
 model/registerDto.ts

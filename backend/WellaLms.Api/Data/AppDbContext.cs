@@ -18,6 +18,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<FAQ> FAQs { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<StudentProgress> StudentProgresses { get; set; }
+    public DbSet<LessonProgress> LessonProgresses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

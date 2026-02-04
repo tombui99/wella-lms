@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthenticationService } from '../core/auth/auth.service';
 import { Router } from '@angular/router';
+import { StudentProgressService } from '../api/api/studentProgress.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -28,9 +29,7 @@ import { Router } from '@angular/router';
           <div class="flex items-center space-x-4">
             <span class="text-gray-600"
               >Welcome,
-              <span class="font-semibold text-indigo-600">{{
-                authService.userRole$ | async
-              }}</span></span
+              <span class="font-semibold text-indigo-600">{{ authService.userRole() }}</span></span
             >
             <button (click)="logout()" class="text-sm text-red-600 hover:text-red-800 font-medium">
               Logout
@@ -42,10 +41,7 @@ import { Router } from '@angular/router';
       <!-- Main Content -->
       <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <!-- Teacher/Admin Section -->
-        @if (
-          (authService.userRole$ | async) === 'Teacher' ||
-          (authService.userRole$ | async) === 'Admin'
-        ) {
+        @if (authService.userRole() === 'Teacher' || authService.userRole() === 'Admin') {
           <div class="mb-8">
             <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
               <span
@@ -116,8 +112,89 @@ import { Router } from '@angular/router';
           </div>
         }
 
+        <!-- Student Progress Summary (New) -->
+        @if (authService.userRole() === 'Student' && overallProgress() !== null) {
+          <div class="mb-10 animate-fade-in">
+            <div
+              class="bg-white rounded-3xl p-8 shadow-xl border border-indigo-50/50 relative overflow-hidden"
+            >
+              <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                <!-- Circular Progress -->
+                <div class="relative w-32 h-32 flex-shrink-0">
+                  <svg class="w-full h-full transform -rotate-90">
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r="58"
+                      stroke="currentColor"
+                      stroke-width="8"
+                      fill="transparent"
+                      class="text-gray-100"
+                    />
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r="58"
+                      stroke="currentColor"
+                      stroke-width="8"
+                      fill="transparent"
+                      [attr.stroke-dasharray]="364.4"
+                      [attr.stroke-dashoffset]="364.4 - (364.4 * overallProgress()!) / 100"
+                      class="text-indigo-600 transition-all duration-1000 ease-out"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <span class="text-3xl font-black text-indigo-600"
+                      >{{ overallProgress() }}%</span
+                    >
+                  </div>
+                </div>
+
+                <div class="flex-grow text-center md:text-left">
+                  <h3 class="text-2xl font-black text-gray-900 mb-2">Your Learning Journey</h3>
+                  <p class="text-gray-500 mb-4 max-w-md">
+                    You've completed {{ overallProgress() }}% of your assigned materials. Keep going
+                    to reach your certification!
+                  </p>
+                  <div class="flex flex-wrap justify-center md:justify-start gap-4">
+                    <div class="bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100">
+                      <span class="block text-xs font-bold text-indigo-400 uppercase tracking-wider"
+                        >Status</span
+                      >
+                      <span class="text-indigo-700 font-bold">
+                        @if (overallProgress()! >= 100) {
+                          Mastered
+                        } @else if (overallProgress()! >= 50) {
+                          On Track
+                        } @else {
+                          Just Starting
+                        }
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="hidden lg:block">
+                  <button
+                    (click)="navigateToStudentCourses()"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-2xl shadow-lg shadow-indigo-200 transition-all hover:scale-105 active:scale-95"
+                  >
+                    Continue Learning
+                  </button>
+                </div>
+              </div>
+
+              <!-- Decorative Background Element -->
+              <div
+                class="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-indigo-50 rounded-full blur-3xl opacity-50"
+              ></div>
+            </div>
+          </div>
+        }
+
         <!-- Student Section -->
-        @if ((authService.userRole$ | async) === 'Student') {
+        @if (authService.userRole() === 'Student') {
           <h2 class="text-xl font-bold text-gray-800 mb-4">Dashboard Overview</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Widget: Schedule -->
@@ -149,6 +226,7 @@ import { Router } from '@angular/router';
 
             <!-- Widget: Courses -->
             <div
+              (click)="navigateToStudentCourses()"
               class="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition cursor-pointer"
             >
               <div class="p-5">
@@ -233,9 +311,37 @@ import { Router } from '@angular/router';
     </div>
   `,
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   authService = inject(AuthenticationService);
   router = inject(Router);
+  studentProgressService = inject(StudentProgressService);
+
+  overallProgress = signal<number | null>(null);
+
+  ngOnInit() {
+    if (this.authService.userRole() === 'Student') {
+      this.loadOverallProgress();
+    }
+  }
+
+  loadOverallProgress() {
+    this.studentProgressService.apiStudentProgressCoursesGet().subscribe({
+      next: (courses) => {
+        if (courses.length > 0) {
+          const total = courses.reduce((acc, course) => {
+            const progress = course.progressPercentage as any as number;
+            return acc + (progress || 0);
+          }, 0);
+          this.overallProgress.set(Math.round(total / courses.length));
+        } else {
+          this.overallProgress.set(0);
+        }
+      },
+      error: (err) => {
+        console.error('Error loading overall progress:', err);
+      },
+    });
+  }
 
   logout() {
     this.authService.logout();
@@ -243,5 +349,9 @@ export class DashboardComponent {
 
   navigateToCourseManagement() {
     this.router.navigate(['/courses/manage']);
+  }
+
+  navigateToStudentCourses() {
+    this.router.navigate(['/student/courses']);
   }
 }

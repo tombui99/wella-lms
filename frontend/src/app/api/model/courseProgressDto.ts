@@ -8,15 +8,14 @@
  * Do not edit the class manually.
  */
 import { ApiCoursesIdGetIdParameter } from './apiCoursesIdGetIdParameter';
+import { LessonProgressDto } from './lessonProgressDto';
 
 
-export interface Lesson { 
-    title?: string;
-    content?: string | null;
+export interface CourseProgressDto { 
     courseId?: ApiCoursesIdGetIdParameter;
-    id?: ApiCoursesIdGetIdParameter;
-    tenantId?: string | null;
-    createdAt?: string;
-    updatedAt?: string | null;
+    courseTitle?: string;
+    progressPercentage?: ApiCoursesIdGetIdParameter;
+    isStarted?: boolean;
+    lessons?: Array<LessonProgressDto>;
 }
 

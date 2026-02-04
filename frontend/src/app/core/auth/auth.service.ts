@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { AuthService as ApiAuthService } from '../../api/api/auth.service';
 import { LoginDto, RegisterDto } from '../../api/model/models';
 import { BehaviorSubject, tap, catchError, throwError } from 'rxjs';
+import { signal } from '@angular/core';
+
 import { Router } from '@angular/router';
 
 @Injectable({
@@ -12,8 +14,8 @@ export class AuthenticationService {
   private roleKey = 'wella_role';
 
   // To update UI reactively
-  private userRoleSubject = new BehaviorSubject<string | null>(this.getUserRole());
-  public userRole$ = this.userRoleSubject.asObservable();
+  private userRoleSignal = signal<string | null>(this.getUserRole());
+  public userRole = this.userRoleSignal.asReadonly();
 
   constructor(
     private apiAuthService: ApiAuthService,
@@ -26,7 +28,7 @@ export class AuthenticationService {
         if (response && response.token) {
           localStorage.setItem(this.tokenKey, response.token);
           localStorage.setItem(this.roleKey, response.role);
-          this.userRoleSubject.next(response.role);
+          this.userRoleSignal.set(response.role);
         }
       }),
     );
@@ -39,7 +41,7 @@ export class AuthenticationService {
   logout() {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.roleKey);
-    this.userRoleSubject.next(null);
+    this.userRoleSignal.set(null);
     this.router.navigate(['/login']);
   }
 

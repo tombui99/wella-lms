@@ -64,7 +64,8 @@ import { CreateLessonDto, UpdateLessonDto, Lesson } from '../api/model/models';
                   <input
                     type="text"
                     id="title"
-                    [(ngModel)]="lessonData.title"
+                    [ngModel]="lessonData().title"
+                    (ngModelChange)="updateFormField('title', $event)"
                     name="title"
                     required
                     class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg px-4 py-3 border transition-all"
@@ -78,7 +79,8 @@ import { CreateLessonDto, UpdateLessonDto, Lesson } from '../api/model/models';
                   >
                   <textarea
                     id="content"
-                    [(ngModel)]="lessonData.content"
+                    [ngModel]="lessonData().content"
+                    (ngModelChange)="updateFormField('content', $event)"
                     name="content"
                     rows="10"
                     class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-4 py-3 border transition-all"
@@ -96,7 +98,7 @@ import { CreateLessonDto, UpdateLessonDto, Lesson } from '../api/model/models';
                   </button>
                   <button
                     type="submit"
-                    [disabled]="saving() || !lessonData.title"
+                    [disabled]="saving() || !lessonData().title"
                     class="px-8 py-3 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-200 active:scale-95"
                   >
                     {{ saving() ? 'Saving...' : isEditMode() ? 'Update Lesson' : 'Create Lesson' }}
@@ -122,10 +124,14 @@ export class LessonEditComponent implements OnInit {
   courseId = signal<number>(0);
   lessonId = signal<number | null>(null);
 
-  lessonData = {
+  lessonData = signal({
     title: '',
     content: '',
-  };
+  });
+
+  updateFormField(field: 'title' | 'content', value: string) {
+    this.lessonData.update((prev) => ({ ...prev, [field]: value }));
+  }
 
   ngOnInit() {
     const courseIdParam = this.route.snapshot.paramMap.get('courseId');
@@ -146,10 +152,13 @@ export class LessonEditComponent implements OnInit {
     this.loading.set(true);
     this.lessonsService.apiLessonsIdGet(id).subscribe({
       next: (lesson) => {
-        this.lessonData.title = lesson.title ?? '';
-        this.lessonData.content = lesson.content || '';
+        this.lessonData.set({
+          title: lesson.title ?? '',
+          content: lesson.content || '',
+        });
         this.loading.set(false);
       },
+
       error: (err) => {
         this.error.set('Failed to load lesson details.');
         this.loading.set(false);
@@ -159,15 +168,15 @@ export class LessonEditComponent implements OnInit {
   }
 
   saveLesson() {
-    if (!this.lessonData.title) return;
+    if (!this.lessonData().title) return;
 
     this.saving.set(true);
     this.error.set('');
 
     if (this.isEditMode()) {
       const updateData: UpdateLessonDto = {
-        title: this.lessonData.title,
-        content: this.lessonData.content || null,
+        title: this.lessonData().title,
+        content: this.lessonData().content || null,
       };
 
       this.lessonsService.apiLessonsIdPut(this.lessonId()!, updateData).subscribe({
@@ -183,8 +192,8 @@ export class LessonEditComponent implements OnInit {
       });
     } else {
       const createData: CreateLessonDto = {
-        title: this.lessonData.title,
-        content: this.lessonData.content || null,
+        title: this.lessonData().title,
+        content: this.lessonData().content || null,
         courseId: this.courseId(),
       };
 

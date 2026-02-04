@@ -24,6 +24,21 @@ export const routes: Routes = [
     component: LessonEditComponent,
     canActivate: [authGuard, teacherGuard],
   },
+  {
+    path: 'student/courses',
+    loadComponent: () =>
+      import('./student-courses/student-courses.component').then((m) => m.StudentCoursesComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'student/courses/:courseId',
+    loadComponent: () =>
+      import('./student-course-detail/student-course-detail.component').then(
+        (m) => m.StudentCourseDetailComponent,
+      ),
+    canActivate: [authGuard],
+  },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+
   { path: '**', redirectTo: 'dashboard' },
 ];

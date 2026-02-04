@@ -10,13 +10,10 @@
 import { ApiCoursesIdGetIdParameter } from './apiCoursesIdGetIdParameter';
 
 
-export interface Lesson { 
-    title?: string;
-    content?: string | null;
-    courseId?: ApiCoursesIdGetIdParameter;
-    id?: ApiCoursesIdGetIdParameter;
-    tenantId?: string | null;
-    createdAt?: string;
-    updatedAt?: string | null;
+export interface LessonProgressDto { 
+    lessonId?: ApiCoursesIdGetIdParameter;
+    lessonTitle?: string;
+    isCompleted?: boolean;
+    completedAt?: string | null;
 }
 
