@@ -14,5 +14,8 @@ export interface CreateLessonDto {
     title: string;
     content: string | null;
     courseId: ApiCoursesIdGetIdParameter;
+    videoUrl?: string | null;
+    pdfUrl?: string | null;
+    externalVideoUrl?: string | null;
 }
 

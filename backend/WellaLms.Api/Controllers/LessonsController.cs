@@ -49,6 +49,9 @@ public class LessonsController : ControllerBase
             Title = dto.Title,
             Content = dto.Content,
             CourseId = dto.CourseId,
+            VideoUrl = dto.VideoUrl,
+            PdfUrl = dto.PdfUrl,
+            ExternalVideoUrl = dto.ExternalVideoUrl,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -71,11 +74,57 @@ public class LessonsController : ControllerBase
 
         lesson.Title = dto.Title;
         lesson.Content = dto.Content;
+        lesson.VideoUrl = dto.VideoUrl;
+        lesson.PdfUrl = dto.PdfUrl;
+        lesson.ExternalVideoUrl = dto.ExternalVideoUrl;
         lesson.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    // POST: api/Lessons/{id}/upload
+    [HttpPost("{id}/upload")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadFile(int id, [FromForm] IFormFile file, [FromForm] string type)
+    {
+        var lesson = await _context.Lessons.FindAsync(id);
+        if (lesson == null) return NotFound();
+
+        if (file == null || file.Length == 0) return BadRequest("File is empty");
+
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+        var sanitizeFileName = file.FileName.Replace(" ", "_");
+        var fileName = $"{Guid.NewGuid()}_{sanitizeFileName}";
+        var filePath = Path.Combine(uploadsFolder, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        var fileUrl = $"/uploads/{fileName}";
+
+        if (type.ToLower() == "video")
+        {
+            lesson.VideoUrl = fileUrl;
+        }
+        else if (type.ToLower() == "pdf")
+        {
+            lesson.PdfUrl = fileUrl;
+        }
+        else
+        {
+            return BadRequest("Invalid file type");
+        }
+
+        lesson.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { url = fileUrl });
     }
 
     // DELETE: api/Lessons/{id}

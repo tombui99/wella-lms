@@ -13,6 +13,9 @@ import { ApiCoursesIdGetIdParameter } from './apiCoursesIdGetIdParameter';
 export interface Lesson { 
     title?: string;
     content?: string | null;
+    videoUrl?: string | null;
+    pdfUrl?: string | null;
+    externalVideoUrl?: string | null;
     courseId?: ApiCoursesIdGetIdParameter;
     id?: ApiCoursesIdGetIdParameter;
     tenantId?: string | null;

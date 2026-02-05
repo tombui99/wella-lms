@@ -51,7 +51,7 @@ public class StudentProgressController : ControllerBase
         if (userId == null) return Unauthorized();
 
         var courses = await _context.Courses
-            .Include(c => c.Lessons)
+            .Include(c => c.Lessons.OrderBy(l => l.CreatedAt))
             .ToListAsync();
 
         var progresses = await _context.StudentProgresses
@@ -87,6 +87,10 @@ public class StudentProgressController : ControllerBase
                     {
                         LessonId = l.Id,
                         LessonTitle = l.Title,
+                        Content = l.Content,
+                        VideoUrl = l.VideoUrl,
+                        PdfUrl = l.PdfUrl,
+                        ExternalVideoUrl = l.ExternalVideoUrl,
                         IsCompleted = lp?.IsCompleted ?? false,
                         CompletedAt = lp?.CompletedAt
                     };
@@ -104,7 +108,7 @@ public class StudentProgressController : ControllerBase
         if (userId == null) return Unauthorized();
 
         var course = await _context.Courses
-            .Include(c => c.Lessons)
+            .Include(c => c.Lessons.OrderBy(l => l.CreatedAt))
             .FirstOrDefaultAsync(c => c.Id == courseId);
 
         if (course == null) return NotFound("Course not found");
@@ -135,6 +139,10 @@ public class StudentProgressController : ControllerBase
                 {
                     LessonId = l.Id,
                     LessonTitle = l.Title,
+                    Content = l.Content,
+                    VideoUrl = l.VideoUrl,
+                    PdfUrl = l.PdfUrl,
+                    ExternalVideoUrl = l.ExternalVideoUrl,
                     IsCompleted = lp?.IsCompleted ?? false,
                     CompletedAt = lp?.CompletedAt
                 };

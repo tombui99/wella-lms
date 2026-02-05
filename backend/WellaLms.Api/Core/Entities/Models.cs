@@ -37,6 +37,9 @@ public class Lesson : BaseEntity
 {
     public string Title { get; set; } = default!;
     public string? Content { get; set; }
+    public string? VideoUrl { get; set; }
+    public string? PdfUrl { get; set; }
+    public string? ExternalVideoUrl { get; set; }
     public int CourseId { get; set; }
     [JsonIgnore]
     public Course Course { get; set; } = default!;

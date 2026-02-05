@@ -22,14 +22,14 @@ public class CoursesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Course>>> GetCourses()
     {
-        return await _context.Courses.Include(c => c.Lessons).ToListAsync();
+        return await _context.Courses.Include(c => c.Lessons.OrderBy(l => l.CreatedAt)).ToListAsync();
     }
 
     // GET: api/Courses/{id} - Public endpoint for all users
     [HttpGet("{id}")]
     public async Task<ActionResult<Course>> GetCourse(int id)
     {
-        var course = await _context.Courses.Include(c => c.Lessons).FirstOrDefaultAsync(c => c.Id == id);
+        var course = await _context.Courses.Include(c => c.Lessons.OrderBy(l => l.CreatedAt)).FirstOrDefaultAsync(c => c.Id == id);
 
         if (course == null)
         {

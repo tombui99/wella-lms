@@ -9,11 +9,6 @@
  */
 
 
-export interface UpdateLessonDto { 
-    title: string;
-    content: string | null;
-    videoUrl?: string | null;
-    pdfUrl?: string | null;
-    externalVideoUrl?: string | null;
+export interface ApiLessonsIdUploadPostRequestAllOfLength { 
 }
 

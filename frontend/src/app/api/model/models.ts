@@ -1,4 +1,5 @@
 export * from './apiCoursesIdGetIdParameter';
+export * from './apiLessonsIdUploadPostRequestAllOfLength';
 export * from './applicationUser';
 export * from './batchUpdateChoiceDto';
 export * from './batchUpdateChoiceDtoId';

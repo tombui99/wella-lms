@@ -7,10 +7,24 @@ import { CourseProgressDto } from '../api/model/courseProgressDto';
 import { LessonProgressDto } from '../api/model/lessonProgressDto';
 import { NotificationService } from '../services/notification.service';
 
+import { DomSanitizer } from '@angular/platform-browser';
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'safe',
+  standalone: true,
+})
+export class SafePipe implements PipeTransform {
+  constructor(private sanitizer: DomSanitizer) {}
+  transform(url: string) {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+}
+
 @Component({
   selector: 'app-student-course-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SafePipe],
   template: `
     <div class="min-h-screen bg-gray-50 py-8">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -228,19 +242,105 @@ import { NotificationService } from '../services/notification.service';
 
                 @if (expandedLessonId() === lesson.lessonId) {
                   <div class="p-6 bg-gray-50 border-t border-gray-100 animate-fadeIn">
-                    <div class="prose prose-sm max-w-none text-gray-600 mb-6">
-                      <p>
-                        Welcome to this lesson! Please review the materials below to continue your
-                        progress.
-                      </p>
-                      <div
-                        class="bg-white p-4 rounded-xl border border-dashed border-gray-300 flex items-center justify-center text-gray-400 mt-4 italic"
-                      >
-                        Lesson content (PDFs/Videos) would be displayed here.
-                      </div>
+                    <!-- Lesson Media Content -->
+                    <div class="mt-6 space-y-6">
+                      @if (lesson.content) {
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                          <div class="rich-text-content" [innerHTML]="lesson.content"></div>
+                        </div>
+                      }
+
+                      @if (lesson.externalVideoUrl) {
+                        <div
+                          class="aspect-video rounded-2xl overflow-hidden shadow-lg border border-gray-200"
+                        >
+                          <iframe
+                            [src]="getYouTubeEmbedUrl(lesson.externalVideoUrl) | safe"
+                            class="w-full h-full"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                          ></iframe>
+                        </div>
+                      }
+
+                      @if (lesson.videoUrl) {
+                        <div
+                          class="bg-black rounded-2xl overflow-hidden shadow-lg border border-gray-200 aspect-video"
+                        >
+                          <video controls class="w-full h-full">
+                            <source [src]="getFullUrl(lesson.videoUrl)" type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                      }
+
+                      @if (lesson.pdfUrl) {
+                        <div
+                          class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden"
+                        >
+                          <div
+                            class="p-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between"
+                          >
+                            <span class="text-sm font-bold text-gray-600 flex items-center">
+                              <svg
+                                class="w-5 h-5 mr-2 text-red-500"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fill-rule="evenodd"
+                                  d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                  clip-rule="evenodd"
+                                ></path>
+                              </svg>
+                              Course Document (PDF)
+                            </span>
+                            <a
+                              [href]="getFullUrl(lesson.pdfUrl)"
+                              target="_blank"
+                              class="text-indigo-600 hover:text-indigo-800 text-xs font-bold uppercase tracking-wider"
+                              >Open in new tab</a
+                            >
+                          </div>
+                          <div class="h-[600px] w-full">
+                            <iframe
+                              [src]="getFullUrl(lesson.pdfUrl) | safe"
+                              class="w-full h-full"
+                              frameborder="0"
+                            ></iframe>
+                          </div>
+                        </div>
+                      }
+
+                      @if (
+                        !lesson.content &&
+                        !lesson.externalVideoUrl &&
+                        !lesson.videoUrl &&
+                        !lesson.pdfUrl
+                      ) {
+                        <div
+                          class="bg-white p-8 rounded-2xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 italic"
+                        >
+                          <svg
+                            class="w-12 h-12 mb-3 text-gray-300"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                            ></path>
+                          </svg>
+                          <p>This lesson is currently being prepared by the teacher.</p>
+                        </div>
+                      }
                     </div>
 
-                    <div class="flex justify-end pt-4 border-t border-gray-200">
+                    <div class="flex justify-end pt-8 mt-4 border-t border-gray-200">
                       @if (!lesson.isCompleted) {
                         <button
                           (click)="completeLesson(lesson.lessonId)"
@@ -380,6 +480,57 @@ import { NotificationService } from '../services/notification.service';
         }
       }
     `,
+    `
+      .rich-text-content {
+        color: #374151;
+        line-height: 1.6;
+      }
+      .rich-text-content ::ng-deep h1 {
+        font-size: 2em;
+        font-weight: bold;
+        margin: 1em 0 0.5em;
+      }
+      .rich-text-content ::ng-deep h2 {
+        font-size: 1.5em;
+        font-weight: bold;
+        margin: 1em 0 0.5em;
+      }
+      .rich-text-content ::ng-deep h3 {
+        font-size: 1.25em;
+        font-weight: bold;
+        margin: 1em 0 0.5em;
+      }
+      .rich-text-content ::ng-deep ul {
+        list-style-type: disc;
+        padding-left: 1.5em;
+        margin: 1em 0;
+      }
+      .rich-text-content ::ng-deep ol {
+        list-style-type: decimal;
+        padding-left: 1.5em;
+        margin: 1em 0;
+      }
+      .rich-text-content ::ng-deep img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 1em 0;
+      }
+      .rich-text-content ::ng-deep blockquote {
+        border-left: 4px solid #e5e7eb;
+        padding-left: 1em;
+        color: #6b7280;
+        font-style: italic;
+        margin: 1em 0;
+      }
+      .rich-text-content ::ng-deep pre {
+        background-color: #f3f4f6;
+        padding: 1em;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        margin: 1em 0;
+      }
+    `,
   ],
 })
 export class StudentCourseDetailComponent implements OnInit {
@@ -434,6 +585,19 @@ export class StudentCourseDetailComponent implements OnInit {
 
   toggleLesson(lessonId: any) {
     this.expandedLessonId.set(this.expandedLessonId() === lessonId ? null : lessonId);
+  }
+
+  getYouTubeEmbedUrl(url: string) {
+    if (!url) return '';
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11 ? 'https://www.youtube.com/embed/' + match[2] : '';
+  }
+
+  getFullUrl(path: string) {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return 'http://localhost:5186' + path; // Backend URL
   }
 
   startCourse() {

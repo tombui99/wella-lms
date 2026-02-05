@@ -13,6 +13,10 @@ import { ApiCoursesIdGetIdParameter } from './apiCoursesIdGetIdParameter';
 export interface LessonProgressDto { 
     lessonId?: ApiCoursesIdGetIdParameter;
     lessonTitle?: string;
+    content?: string | null;
+    videoUrl?: string | null;
+    pdfUrl?: string | null;
+    externalVideoUrl?: string | null;
     isCompleted?: boolean;
     completedAt?: string | null;
 }

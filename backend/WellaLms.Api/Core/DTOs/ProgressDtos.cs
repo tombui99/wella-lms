@@ -4,6 +4,10 @@ public class LessonProgressDto
 {
     public int LessonId { get; set; }
     public string LessonTitle { get; set; } = default!;
+    public string? Content { get; set; }
+    public string? VideoUrl { get; set; }
+    public string? PdfUrl { get; set; }
+    public string? ExternalVideoUrl { get; set; }
     public bool IsCompleted { get; set; }
     public DateTime? CompletedAt { get; set; }
 }

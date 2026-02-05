@@ -60,3 +60,7 @@ bazel-out
 
 # Editors
 .editorconfig
+
+# User Uploads
+backend/WellaLms.Api/wwwroot/uploads/**
+!backend/WellaLms.Api/wwwroot/uploads/.gitkeep
