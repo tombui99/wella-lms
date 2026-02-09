@@ -116,7 +116,7 @@ import { LanguageService } from '../core/language/language.service';
                       (click)="selectEvent(event)"
                       class="px-2 py-1.5 bg-indigo-600 text-white rounded-lg text-[10px] md:text-xs font-bold truncate cursor-pointer hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
                     >
-                      {{ formatTime(event.startTime) }} - {{ event.title }}
+                      {{ formatTime(event.startTime || '') }} - {{ event.title }}
                     </div>
                   }
                 </div>
@@ -368,7 +368,7 @@ export class StudentScheduleComponent implements OnInit {
 
   eventsForDay(date: Date): Schedule[] {
     return this.events().filter((event) => {
-      const eventDate = new Date(event.startTime);
+      const eventDate = new Date(event.startTime!);
       return (
         eventDate.getDate() === date.getDate() &&
         eventDate.getMonth() === date.getMonth() &&

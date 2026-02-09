@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using BifrostLms.Api.Core.Entities;
 using BifrostLms.Api.Data;
 using BifrostLms.Api.Core.DTOs;
+using BifrostLms.Api.Core.Services;
 
 namespace BifrostLms.Api.Controllers;
 
@@ -14,10 +15,12 @@ namespace BifrostLms.Api.Controllers;
 public class TeacherController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly ITenantProvider _tenantProvider;
 
-    public TeacherController(AppDbContext context)
+    public TeacherController(AppDbContext context, ITenantProvider tenantProvider)
     {
         _context = context;
+        _tenantProvider = tenantProvider;
     }
 
     // POST: api/Teacher/upload-doc
@@ -26,7 +29,7 @@ public class TeacherController : ControllerBase
     {
         if (string.IsNullOrEmpty(resource.TenantId))
         {
-            resource.TenantId = "default-tenant"; 
+            resource.TenantId = _tenantProvider.TenantId ?? "default-tenant"; 
         }
 
         _context.Resources.Add(resource);

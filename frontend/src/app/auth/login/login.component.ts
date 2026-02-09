@@ -69,26 +69,11 @@ import { TranslateModule } from '@ngx-translate/core';
             Bifrost <span class="text-white/70">LMS</span>
           </h2>
           <p class="text-white/60 text-sm font-bold uppercase tracking-[0.2em] mt-2">
-            {{ (isLogin() ? 'AUTH.WELCOME_BACK' : 'AUTH.CREATE_ACCOUNT') | translate }}
+            {{ 'AUTH.WELCOME_BACK' | translate }}
           </p>
         </div>
 
         <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="space-y-5">
-          @if (!isLogin()) {
-            <div class="animate-slide-down">
-              <label
-                class="block text-white/80 text-xs font-black uppercase tracking-widest mb-2 px-1"
-                >{{ 'AUTH.FULL_NAME' | translate }}</label
-              >
-              <input
-                formControlName="fullName"
-                type="text"
-                class="w-full px-5 py-4 rounded-2xl bg-white/20 border border-white/10 focus:border-white focus:bg-white/30 text-white placeholder-white/40 focus:outline-none transition-all duration-300 shadow-inner"
-                placeholder="John Doe"
-              />
-            </div>
-          }
-
           <div>
             <label
               class="block text-white/80 text-xs font-black uppercase tracking-widest mb-2 px-1"
@@ -131,46 +116,14 @@ import { TranslateModule } from '@ngx-translate/core';
             }
           </div>
 
-          @if (!isLogin()) {
-            <div class="animate-slide-down">
-              <label
-                class="block text-white/80 text-xs font-black uppercase tracking-widest mb-2 px-1"
-                >{{ 'AUTH.SELECT_ROLE' | translate }}</label
-              >
-              <select
-                formControlName="role"
-                class="w-full px-5 py-4 rounded-2xl bg-white/20 border border-white/10 focus:border-white focus:bg-white/30 text-white focus:outline-none transition-all duration-300 shadow-inner [&>option]:text-black"
-              >
-                <option value="Student">{{ 'AUTH.STUDENT' | translate }}</option>
-                <option value="Teacher">{{ 'AUTH.TEACHER' | translate }}</option>
-              </select>
-            </div>
-          }
-
           <button
             type="submit"
             [disabled]="loading()"
             class="w-full bg-white text-indigo-600 font-black py-5 rounded-2xl hover:bg-white/90 transition-all duration-300 shadow-2xl shadow-indigo-900/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-sm mt-4"
           >
-            {{
-              loading()
-                ? ('AUTH.PROCESSING' | translate)
-                : ((isLogin() ? 'AUTH.SIGN_IN_BTN' : 'AUTH.SIGN_UP_BTN') | translate)
-            }}
+            {{ loading() ? ('AUTH.PROCESSING' | translate) : ('AUTH.SIGN_IN_BTN' | translate) }}
           </button>
         </form>
-
-        <div class="mt-8 text-center px-4">
-          <button
-            (click)="toggleMode()"
-            class="text-white/80 hover:text-white text-xs font-bold uppercase tracking-widest transition-all hover:scale-105"
-          >
-            {{ (isLogin() ? 'AUTH.DONT_HAVE_ACCOUNT' : 'AUTH.ALREADY_HAVE_ACCOUNT') | translate }}
-            <span class="block mt-1 text-white font-black text-sm">{{
-              (isLogin() ? 'AUTH.SIGN_UP_BTN' : 'AUTH.SIGN_IN_BTN') | translate
-            }}</span>
-          </button>
-        </div>
 
         @if (errorMessage()) {
           <div
@@ -198,15 +151,7 @@ export class LoginComponent {
     this.authForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      fullName: [''],
-      role: ['Student'],
     });
-  }
-
-  toggleMode() {
-    this.isLogin.update((v) => !v);
-    this.errorMessage.set('');
-    this.authForm.reset({ role: 'Student' });
   }
 
   onSubmit() {
@@ -220,42 +165,17 @@ export class LoginComponent {
     this.errorMessage.set('');
     const val = this.authForm.value;
 
-    if (this.isLogin()) {
-      this.authService.login({ email: val.email, password: val.password }).subscribe({
-        next: () => {
-          this.router.navigate(['/dashboard']);
-        },
-        error: (err) => {
-          console.error('Login Error:', err);
-          this.loading.set(false);
-          this.errorMessage.set(
-            'Login failed. ' + (err.error?.message || 'Please check your credentials.'),
-          );
-        },
-      });
-    } else {
-      this.authService
-        .register({
-          email: val.email,
-          password: val.password,
-          fullName: val.fullName,
-          role: val.role,
-        })
-        .subscribe({
-          next: () => {
-            this.loading.set(false);
-            this.isLogin.set(true); // Switch to login after success
-            this.errorMessage.set('Account created! Please sign in.');
-            this.authForm.reset({ role: 'Student' });
-          },
-          error: (err) => {
-            console.error('Registration Error:', err);
-            this.loading.set(false);
-            this.errorMessage.set(
-              'Registration failed. ' + (err.error?.message || err.message || 'Try again.'),
-            );
-          },
-        });
-    }
+    this.authService.login({ email: val.email, password: val.password }).subscribe({
+      next: () => {
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        console.error('Login Error:', err);
+        this.loading.set(false);
+        this.errorMessage.set(
+          'Login failed. ' + (err.error?.message || 'Please check your credentials.'),
+        );
+      },
+    });
   }
 }

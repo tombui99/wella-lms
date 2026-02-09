@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 export class AuthenticationService {
   private tokenKey = 'bifrost_token';
   private roleKey = 'bifrost_role';
+  private tenantKey = 'bifrost_tenant';
 
   // To update UI reactively
   private userRoleSignal = signal<string | null>(this.getUserRole());
@@ -28,19 +29,17 @@ export class AuthenticationService {
         if (response && response.token) {
           localStorage.setItem(this.tokenKey, response.token);
           localStorage.setItem(this.roleKey, response.role);
+          localStorage.setItem(this.tenantKey, response.tenantId);
           this.userRoleSignal.set(response.role);
         }
       }),
     );
   }
 
-  register(data: RegisterDto) {
-    return this.apiAuthService.apiAuthRegisterPost(data);
-  }
-
   logout() {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.roleKey);
+    localStorage.removeItem(this.tenantKey);
     this.userRoleSignal.set(null);
     this.router.navigate(['/login']);
   }
@@ -51,6 +50,10 @@ export class AuthenticationService {
 
   getUserRole(): string | null {
     return localStorage.getItem(this.roleKey);
+  }
+
+  getTenantId(): string | null {
+    return localStorage.getItem(this.tenantKey);
   }
 
   isAuthenticated(): boolean {

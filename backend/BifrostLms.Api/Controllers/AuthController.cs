@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using BifrostLms.Api.Core.DTOs;
 using BifrostLms.Api.Core.Entities;
 
@@ -25,6 +27,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Register([FromBody] RegisterDto model)
     {
         var userExists = await _userManager.FindByEmailAsync(model.Email);
@@ -58,21 +61,22 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto model)
     {
-        var user = await _userManager.FindByEmailAsync(model.Email);
+        var user = await _userManager.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Email == model.Email);
         if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
         {
             var userRoles = await _userManager.GetRolesAsync(user);
 
-            var authClaims = new List<Claim>
+            var authClaims = new List<System.Security.Claims.Claim>
             {
-                new Claim(ClaimTypes.Name, user.UserName!),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new System.Security.Claims.Claim(ClaimTypes.Name, user.UserName!),
+                new System.Security.Claims.Claim(ClaimTypes.NameIdentifier, user.Id),
+                new System.Security.Claims.Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new System.Security.Claims.Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new System.Security.Claims.Claim("TenantId", user.TenantId ?? ""),
             };
             foreach (var userRole in userRoles)
             {
-                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                authClaims.Add(new System.Security.Claims.Claim(ClaimTypes.Role, userRole));
             }
 
             var token = GetToken(authClaims);
@@ -81,13 +85,14 @@ public class AuthController : ControllerBase
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Role = userRoles.FirstOrDefault() ?? "Student",
-                Email = user.Email!
+                Email = user.Email!,
+                TenantId = user.TenantId ?? ""
             });
         }
         return Unauthorized();
     }
 
-    private JwtSecurityToken GetToken(List<Claim> authClaims)
+    private JwtSecurityToken GetToken(List<System.Security.Claims.Claim> authClaims)
     {
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"] ?? "YourSuperSecretKeyForJwtSigning123!"));
 

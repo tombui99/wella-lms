@@ -15,6 +15,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")!));
 
 builder.Services.AddScoped<IProgressService, ProgressService>();
+builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
@@ -83,6 +84,11 @@ app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseMiddleware<BifrostLms.Api.Middleware.TenantMiddleware>();
+
 app.MapControllers();
+
+// Seed data
+await DbInitializer.Seed(app);
 
 app.Run();

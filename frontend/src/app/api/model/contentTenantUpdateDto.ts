@@ -10,15 +10,9 @@
 import { ApiCoursesIdGetIdParameter } from './apiCoursesIdGetIdParameter';
 
 
-export interface Schedule { 
-    title?: string;
-    startTime?: string;
-    endTime?: string;
-    location?: string | null;
-    meetingUrl?: string | null;
-    id?: ApiCoursesIdGetIdParameter;
-    tenantId?: string | null;
-    createdAt?: string;
-    updatedAt?: string | null;
+export interface ContentTenantUpdateDto { 
+    entityType?: string;
+    entityId?: ApiCoursesIdGetIdParameter;
+    newTenantId?: string;
 }
 

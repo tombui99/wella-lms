@@ -3,13 +3,18 @@ namespace BifrostLms.Api.Core.Entities;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 
-public class ApplicationUser : IdentityUser
+public interface IMultiTenant
+{
+    string? TenantId { get; set; }
+}
+
+public class ApplicationUser : IdentityUser, IMultiTenant
 {
     public string? FullName { get; set; }
     public string? TenantId { get; set; } // For multi-tenancy if needed per user
 }
 
-public abstract class BaseEntity
+public abstract class BaseEntity : IMultiTenant
 {
     public int Id { get; set; }
     public string? TenantId { get; set; } // For multi-tenancy
@@ -31,6 +36,15 @@ public class Course : BaseEntity
     public string? Description { get; set; }
     public string? ImageUrl { get; set; }
     public List<Lesson> Lessons { get; set; } = new();
+    public List<CourseTenant> SharedWithTenants { get; set; } = new();
+}
+
+public class CourseTenant
+{
+    public int CourseId { get; set; }
+    [JsonIgnore]
+    public Course Course { get; set; } = default!;
+    public string TenantId { get; set; } = default!;
 }
 
 public class Lesson : BaseEntity

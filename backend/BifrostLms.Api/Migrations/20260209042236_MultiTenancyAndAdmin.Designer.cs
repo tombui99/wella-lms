@@ -3,6 +3,7 @@ using System;
 using BifrostLms.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BifrostLms.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260209042236_MultiTenancyAndAdmin")]
+    partial class MultiTenancyAndAdmin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -149,19 +152,6 @@ namespace BifrostLms.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Courses");
-                });
-
-            modelBuilder.Entity("BifrostLms.Api.Core.Entities.CourseTenant", b =>
-                {
-                    b.Property<int>("CourseId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TenantId")
-                        .HasColumnType("varchar(255)");
-
-                    b.HasKey("CourseId", "TenantId");
-
-                    b.ToTable("CourseTenants");
                 });
 
             modelBuilder.Entity("BifrostLms.Api.Core.Entities.FAQ", b =>
@@ -722,17 +712,6 @@ namespace BifrostLms.Api.Migrations
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("BifrostLms.Api.Core.Entities.CourseTenant", b =>
-                {
-                    b.HasOne("BifrostLms.Api.Core.Entities.Course", "Course")
-                        .WithMany("SharedWithTenants")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-                });
-
             modelBuilder.Entity("BifrostLms.Api.Core.Entities.Lesson", b =>
                 {
                     b.HasOne("BifrostLms.Api.Core.Entities.Course", "Course")
@@ -877,8 +856,6 @@ namespace BifrostLms.Api.Migrations
             modelBuilder.Entity("BifrostLms.Api.Core.Entities.Course", b =>
                 {
                     b.Navigation("Lessons");
-
-                    b.Navigation("SharedWithTenants");
                 });
 
             modelBuilder.Entity("BifrostLms.Api.Core.Entities.Question", b =>

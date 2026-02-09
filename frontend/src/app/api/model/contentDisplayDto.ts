@@ -8,19 +8,14 @@
  * Do not edit the class manually.
  */
 import { ApiCoursesIdGetIdParameter } from './apiCoursesIdGetIdParameter';
-import { CourseTenant } from './courseTenant';
-import { Lesson } from './lesson';
 
 
-export interface Course { 
-    title?: string;
-    description?: string | null;
-    imageUrl?: string | null;
-    lessons?: Array<Lesson>;
-    sharedWithTenants?: Array<CourseTenant>;
+export interface ContentDisplayDto { 
     id?: ApiCoursesIdGetIdParameter;
-    tenantId?: string | null;
+    title?: string;
+    type?: string;
+    tenantId?: string;
+    sharedTenantIds?: Array<string>;
     createdAt?: string;
-    updatedAt?: string | null;
 }
 

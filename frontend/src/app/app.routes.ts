@@ -5,6 +5,7 @@ import { CourseManagementComponent } from './course-management/course-management
 import { LessonEditComponent } from './lesson-edit/lesson-edit.component';
 import { authGuard } from './core/auth/auth.guard';
 import { teacherGuard } from './core/auth/teacher.guard';
+import { adminGuard } from './core/auth/admin.guard';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -72,6 +73,30 @@ export const routes: Routes = [
         (m) => m.TeacherScheduleManagementComponent,
       ),
     canActivate: [authGuard, teacherGuard],
+  },
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./admin/admin-layout.component').then((m) => m.AdminLayoutComponent),
+    canActivate: [authGuard, adminGuard],
+    children: [
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./admin/user-management.component').then((m) => m.UserManagementComponent),
+      },
+      {
+        path: 'tenants',
+        loadComponent: () =>
+          import('./admin/tenant-management.component').then((m) => m.TenantManagementComponent),
+      },
+      {
+        path: 'content',
+        loadComponent: () =>
+          import('./admin/content-management.component').then((m) => m.ContentManagementComponent),
+      },
+      { path: '', redirectTo: 'users', pathMatch: 'full' },
+    ],
   },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 

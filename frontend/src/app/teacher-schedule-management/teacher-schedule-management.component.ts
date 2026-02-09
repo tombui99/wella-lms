@@ -395,8 +395,8 @@ export class TeacherScheduleManagementComponent implements OnInit {
     this.formData = {
       ...item,
       // Format dates for input[type="datetime-local"]
-      startTime: this.formatForInput(item.startTime),
-      endTime: this.formatForInput(item.endTime),
+      startTime: this.formatForInput(item.startTime || ''),
+      endTime: this.formatForInput(item.endTime || ''),
     };
     this.showForm.set(true);
   }
@@ -426,7 +426,8 @@ export class TeacherScheduleManagementComponent implements OnInit {
     });
   }
 
-  deleteSchedule(id: number) {
+  deleteSchedule(id: any) {
+    if (!id) return;
     if (!confirm(this.translate.instant('SCHEDULE.DELETE_CONFIRM'))) return;
 
     this.schedulesService.apiSchedulesIdDelete(id).subscribe({

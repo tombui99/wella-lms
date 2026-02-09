@@ -1,3 +1,5 @@
+export * from './admin.service';
+import { AdminService } from './admin.service';
 export * from './auth.service';
 import { AuthService } from './auth.service';
 export * from './courses.service';
@@ -6,18 +8,10 @@ export * from './lessons.service';
 import { LessonsService } from './lessons.service';
 export * from './quizzes.service';
 import { QuizzesService } from './quizzes.service';
+export * from './schedules.service';
+import { SchedulesService } from './schedules.service';
 export * from './studentProgress.service';
 import { StudentProgressService } from './studentProgress.service';
 export * from './teacher.service';
 import { TeacherService } from './teacher.service';
-export * from './schedules.service';
-import { SchedulesService } from './schedules.service';
-export const APIS = [
-  AuthService,
-  CoursesService,
-  LessonsService,
-  QuizzesService,
-  StudentProgressService,
-  TeacherService,
-  SchedulesService,
-];
+export const APIS = [AdminService, AuthService, CoursesService, LessonsService, QuizzesService, SchedulesService, StudentProgressService, TeacherService];
