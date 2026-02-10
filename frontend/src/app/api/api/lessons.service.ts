@@ -17,9 +17,9 @@ import { Observable }                                        from 'rxjs';
 import { OpenApiHttpParams, QueryParamStyle } from '../query.params';
 
 // @ts-ignore
-import { ApiCoursesIdGetIdParameter } from '../model/apiCoursesIdGetIdParameter';
+import { ApiAdminTenantsIdLogoPostRequestLength } from '../model/apiAdminTenantsIdLogoPostRequestLength';
 // @ts-ignore
-import { ApiLessonsIdUploadPostRequestAllOfLength } from '../model/apiLessonsIdUploadPostRequestAllOfLength';
+import { ApiCoursesIdGetIdParameter } from '../model/apiCoursesIdGetIdParameter';
 // @ts-ignore
 import { CreateLessonDto } from '../model/createLessonDto';
 // @ts-ignore
@@ -238,10 +238,10 @@ export class LessonsService extends BaseService {
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public apiLessonsIdUploadPost(id: ApiCoursesIdGetIdParameter, contentType?: string, contentDisposition?: string, headers?: { [key: string]: Array<string>; }, length?: ApiLessonsIdUploadPostRequestAllOfLength, name?: string, fileName?: string, type?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public apiLessonsIdUploadPost(id: ApiCoursesIdGetIdParameter, contentType?: string, contentDisposition?: string, headers?: { [key: string]: Array<string>; }, length?: ApiLessonsIdUploadPostRequestAllOfLength, name?: string, fileName?: string, type?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public apiLessonsIdUploadPost(id: ApiCoursesIdGetIdParameter, contentType?: string, contentDisposition?: string, headers?: { [key: string]: Array<string>; }, length?: ApiLessonsIdUploadPostRequestAllOfLength, name?: string, fileName?: string, type?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public apiLessonsIdUploadPost(id: ApiCoursesIdGetIdParameter, contentType?: string, contentDisposition?: string, headers?: { [key: string]: Array<string>; }, length?: ApiLessonsIdUploadPostRequestAllOfLength, name?: string, fileName?: string, type?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public apiLessonsIdUploadPost(id: ApiCoursesIdGetIdParameter, contentType?: string, contentDisposition?: string, headers?: { [key: string]: Array<string>; }, length?: ApiAdminTenantsIdLogoPostRequestLength, name?: string, fileName?: string, type?: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public apiLessonsIdUploadPost(id: ApiCoursesIdGetIdParameter, contentType?: string, contentDisposition?: string, headers?: { [key: string]: Array<string>; }, length?: ApiAdminTenantsIdLogoPostRequestLength, name?: string, fileName?: string, type?: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public apiLessonsIdUploadPost(id: ApiCoursesIdGetIdParameter, contentType?: string, contentDisposition?: string, headers?: { [key: string]: Array<string>; }, length?: ApiAdminTenantsIdLogoPostRequestLength, name?: string, fileName?: string, type?: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public apiLessonsIdUploadPost(id: ApiCoursesIdGetIdParameter, contentType?: string, contentDisposition?: string, headers?: { [key: string]: Array<string>; }, length?: ApiAdminTenantsIdLogoPostRequestLength, name?: string, fileName?: string, type?: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (id === null || id === undefined) {
             throw new Error('Required parameter id was null or undefined when calling apiLessonsIdUploadPost.');
         }

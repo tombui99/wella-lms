@@ -1,5 +1,5 @@
+export * from './apiAdminTenantsIdLogoPostRequestLength';
 export * from './apiCoursesIdGetIdParameter';
-export * from './apiLessonsIdUploadPostRequestAllOfLength';
 export * from './batchUpdateChoiceDto';
 export * from './batchUpdateChoiceDtoId';
 export * from './batchUpdateQuestionDto';

@@ -14,4 +14,6 @@ export * from './studentProgress.service';
 import { StudentProgressService } from './studentProgress.service';
 export * from './teacher.service';
 import { TeacherService } from './teacher.service';
-export const APIS = [AdminService, AuthService, CoursesService, LessonsService, QuizzesService, SchedulesService, StudentProgressService, TeacherService];
+export * from './tenants.service';
+import { TenantsService } from './tenants.service';
+export const APIS = [AdminService, AuthService, CoursesService, LessonsService, QuizzesService, SchedulesService, StudentProgressService, TeacherService, TenantsService];

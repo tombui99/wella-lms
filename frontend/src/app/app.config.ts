@@ -6,12 +6,14 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/auth/auth.interceptor';
+import { BASE_PATH } from './api/variables';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
+    { provide: BASE_PATH, useValue: 'http://localhost:5186' },
     provideTranslateService({
       defaultLanguage: 'vi',
     }),

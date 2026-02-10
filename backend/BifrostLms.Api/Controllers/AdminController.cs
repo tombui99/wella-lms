@@ -16,15 +16,18 @@ public class AdminController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly AppDbContext _context;
+    private readonly IWebHostEnvironment _environment;
 
     public AdminController(
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
-        AppDbContext context)
+        AppDbContext context,
+        IWebHostEnvironment environment)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _context = context;
+        _environment = environment;
     }
 
     // --- User Management ---
@@ -151,6 +154,80 @@ public class AdminController : ControllerBase
         _context.Entry(tenant).State = EntityState.Modified;
         await _context.SaveChangesAsync();
         return NoContent();
+    }
+
+    [HttpDelete("tenants/{id}")]
+    public async Task<IActionResult> DeleteTenant(string id)
+    {
+        var tenant = await _context.Tenants.FindAsync(id);
+        if (tenant == null) return NotFound();
+
+        _context.Tenants.Remove(tenant);
+        await _context.SaveChangesAsync();
+        return Ok(new { Message = "Tenant deleted successfully!" });
+    }
+
+    [HttpPost("tenants/{id}/logo")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadLogo(string id, [FromForm] IFormFile file)
+    {
+        var tenant = await _context.Tenants.FindAsync(id);
+        if (tenant == null) return NotFound();
+
+        if (file == null || file.Length == 0)
+            return BadRequest("No file uploaded.");
+
+        var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads", "logos");
+        if (!Directory.Exists(uploadsPath))
+            Directory.CreateDirectory(uploadsPath);
+
+        var fileName = $"{id}_{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+        var filePath = Path.Combine(uploadsPath, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        // Delete old logo if it exists
+        if (!string.IsNullOrEmpty(tenant.LogoUrl))
+        {
+            var oldFileName = Path.GetFileName(tenant.LogoUrl);
+            var oldFilePath = Path.Combine(uploadsPath, oldFileName);
+            if (System.IO.File.Exists(oldFilePath))
+            {
+                System.IO.File.Delete(oldFilePath);
+            }
+        }
+
+        tenant.LogoUrl = $"/uploads/logos/{fileName}";
+        await _context.SaveChangesAsync();
+
+        return Ok(new { LogoUrl = tenant.LogoUrl });
+    }
+
+    [HttpDelete("tenants/{id}/logo")]
+    public async Task<IActionResult> DeleteLogo(string id)
+    {
+        var tenant = await _context.Tenants.FindAsync(id);
+        if (tenant == null) return NotFound();
+
+        if (string.IsNullOrEmpty(tenant.LogoUrl))
+            return BadRequest("No logo to delete.");
+
+        var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads", "logos");
+        var fileName = Path.GetFileName(tenant.LogoUrl);
+        var filePath = Path.Combine(uploadsPath, fileName);
+
+        if (System.IO.File.Exists(filePath))
+        {
+            System.IO.File.Delete(filePath);
+        }
+
+        tenant.LogoUrl = null;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { Message = "Logo deleted successfully!" });
     }
 
     // --- Content Management (Global Access) ---

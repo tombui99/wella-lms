@@ -9,11 +9,6 @@
  */
 
 
-export interface Tenant { 
-    id?: string;
-    name?: string;
-    domain?: string | null;
-    logoUrl?: string | null;
-    isActive?: boolean;
+export interface ApiAdminTenantsIdLogoPostRequestLength { 
 }
 

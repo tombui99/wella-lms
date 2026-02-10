@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AdminService } from '../api/api/admin.service';
 import { Tenant } from '../api/model/models';
+import { HttpClient } from '@angular/common/http';
+import { BASE_PATH } from '../api/variables';
 
 @Component({
   selector: 'app-tenant-management',
@@ -20,7 +22,7 @@ import { Tenant } from '../api/model/models';
           </p>
         </div>
         <button
-          (click)="showCreateModal.set(true)"
+          (click)="openCreateModal()"
           class="bg-indigo-600 text-white px-8 py-3.5 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-600/20 active:scale-95 flex items-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,7 +30,7 @@ import { Tenant } from '../api/model/models';
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2.5"
-              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2-2h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
             />
           </svg>
           Register New Tenant
@@ -39,6 +41,11 @@ import { Tenant } from '../api/model/models';
         <table class="w-full">
           <thead>
             <tr class="bg-gray-50/50 border-b border-gray-100">
+              <th
+                class="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]"
+              >
+                Logo
+              </th>
               <th
                 class="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]"
               >
@@ -69,6 +76,22 @@ import { Tenant } from '../api/model/models';
           <tbody class="divide-y divide-gray-100">
             @for (tenant of tenants(); track tenant.id) {
               <tr class="group hover:bg-indigo-50/30 transition-colors">
+                <td class="px-8 py-6">
+                  <div
+                    class="w-12 h-12 rounded-xl bg-white overflow-hidden flex items-center justify-center border border-gray-100 group-hover:border-indigo-200 transition-all"
+                  >
+                    @if (tenant.logoUrl) {
+                      <img
+                        [src]="basePath + tenant.logoUrl"
+                        class="w-full h-full object-contain p-1"
+                      />
+                    } @else {
+                      <span class="text-xs font-black text-gray-300 italic">{{
+                        tenant.id?.substring(0, 2)?.toUpperCase()
+                      }}</span>
+                    }
+                  </div>
+                </td>
                 <td class="px-8 py-6">
                   <span class="font-black text-indigo-600 text-sm italic">{{ tenant.id }}</span>
                 </td>
@@ -118,7 +141,7 @@ import { Tenant } from '../api/model/models';
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             class="absolute inset-0 bg-indigo-950/40 backdrop-blur-md"
-            (click)="showCreateModal.set(false)"
+            (click)="closeModal()"
           ></div>
 
           <div
@@ -137,6 +160,96 @@ import { Tenant } from '../api/model/models';
             </div>
 
             <form [formGroup]="tenantForm" (ngSubmit)="onSubmit()" class="p-10 space-y-6">
+              <!-- Logo Upload Section -->
+              <div
+                class="flex items-center gap-6 p-6 rounded-3xl bg-gray-50/50 border border-gray-100"
+              >
+                <div class="relative group cursor-pointer" (click)="logoInput.click()">
+                  <div
+                    class="w-24 h-24 rounded-2xl bg-white shadow-lg border border-gray-100 overflow-hidden flex items-center justify-center group-hover:border-indigo-300 transition-all"
+                  >
+                    @if (logoPreview() || currentLogoUrl()) {
+                      <img
+                        [src]="logoPreview() || basePath + currentLogoUrl()"
+                        class="w-full h-full object-contain p-2"
+                      />
+                    } @else {
+                      <svg
+                        class="w-8 h-8 text-gray-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    }
+                    <div
+                      class="absolute inset-0 bg-indigo-600/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"
+                    >
+                      <svg
+                        class="w-6 h-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                        />
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <input
+                    #logoInput
+                    type="file"
+                    class="hidden"
+                    (change)="onFileSelected($event)"
+                    accept="image/*"
+                  />
+                </div>
+
+                <div class="flex-1 space-y-2">
+                  <h5 class="text-sm font-black text-gray-900 uppercase tracking-wider">
+                    Company Logo
+                  </h5>
+                  <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest italic">
+                    Attach your brand identity
+                  </p>
+                  <div class="flex items-center gap-3 pt-1">
+                    <button
+                      type="button"
+                      (click)="logoInput.click()"
+                      class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 hover:text-indigo-700 transition-colors"
+                    >
+                      Change Logo
+                    </button>
+                    @if (currentLogoUrl() || logoPreview()) {
+                      <span class="text-gray-300 text-[10px]">•</span>
+                      <button
+                        type="button"
+                        (click)="deleteLogo()"
+                        class="text-[10px] font-black uppercase tracking-[0.2em] text-red-500 hover:text-red-600 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+
               <div class="grid grid-cols-2 gap-6">
                 <div>
                   <label
@@ -196,16 +309,33 @@ import { Tenant } from '../api/model/models';
               <div class="flex gap-4 pt-6">
                 <button
                   type="button"
-                  (click)="showCreateModal.set(false)"
+                  (click)="closeModal()"
                   class="flex-1 px-8 py-5 rounded-2xl font-black text-xs uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  [disabled]="tenantForm.invalid"
-                  class="flex-2 px-10 py-5 rounded-2xl bg-indigo-600 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50"
+                  [disabled]="tenantForm.invalid || isSubmitting()"
+                  class="flex-2 px-10 py-5 rounded-2xl bg-indigo-600 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
+                  @if (isSubmitting()) {
+                    <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      ></circle>
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  }
                   {{ isEditMode() ? 'Save Changes' : 'Confirm & Register' }}
                 </button>
               </div>
@@ -220,10 +350,17 @@ export class TenantManagementComponent implements OnInit {
   tenants = signal<Tenant[]>([]);
   showCreateModal = signal(false);
   isEditMode = signal(false);
+  isSubmitting = signal(false);
   tenantForm: FormGroup;
 
+  logoPreview = signal<string | null>(null);
+  currentLogoUrl = signal<string | null>(null);
+  selectedFile: File | null = null;
+
+  basePath = inject(BASE_PATH);
   private adminService = inject(AdminService);
   private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
 
   constructor() {
     this.tenantForm = this.fb.group({
@@ -242,23 +379,91 @@ export class TenantManagementComponent implements OnInit {
     this.adminService.apiAdminTenantsGet().subscribe((tenants) => this.tenants.set(tenants));
   }
 
+  openCreateModal() {
+    this.isEditMode.set(false);
+    this.tenantForm.reset({ isActive: true });
+    this.logoPreview.set(null);
+    this.currentLogoUrl.set(null);
+    this.selectedFile = null;
+    this.showCreateModal.set(true);
+  }
+
   onEditTenant(tenant: Tenant) {
     this.isEditMode.set(true);
     this.tenantForm.patchValue(tenant);
+    this.currentLogoUrl.set(tenant.logoUrl || null);
+    this.logoPreview.set(null);
+    this.selectedFile = null;
     this.showCreateModal.set(true);
+  }
+
+  closeModal() {
+    this.showCreateModal.set(false);
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => this.logoPreview.set(e.target?.result as string);
+      reader.readAsDataURL(file);
+    }
+  }
+
+  deleteLogo() {
+    if (this.isEditMode() && this.currentLogoUrl()) {
+      const tenantId = this.tenantForm.value.id;
+      this.adminService.apiAdminTenantsIdLogoDelete(tenantId).subscribe(() => {
+        this.currentLogoUrl.set(null);
+        this.logoPreview.set(null);
+        this.selectedFile = null;
+        this.loadData();
+      });
+    } else {
+      this.logoPreview.set(null);
+      this.selectedFile = null;
+    }
   }
 
   onSubmit() {
     if (this.tenantForm.valid) {
+      this.isSubmitting.set(true);
+      const tenantData = this.tenantForm.value;
       const request = this.isEditMode()
-        ? this.adminService.apiAdminTenantsIdPut(this.tenantForm.value.id, this.tenantForm.value)
-        : this.adminService.apiAdminTenantsPost(this.tenantForm.value);
+        ? this.adminService.apiAdminTenantsIdPut(tenantData.id, tenantData)
+        : this.adminService.apiAdminTenantsPost(tenantData);
 
-      request.subscribe(() => {
-        this.showCreateModal.set(false);
-        this.tenantForm.reset({ isActive: true });
-        this.loadData();
+      request.subscribe({
+        next: (response: any) => {
+          const tenantId = this.isEditMode() ? tenantData.id : response.id || tenantData.id;
+
+          if (this.selectedFile) {
+            this.uploadLogo(tenantId);
+          } else {
+            this.onSuccess();
+          }
+        },
+        error: () => this.isSubmitting.set(false),
       });
     }
+  }
+
+  uploadLogo(tenantId: string) {
+    if (!this.selectedFile) return;
+
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+
+    this.http.post(`${this.basePath}/api/Admin/tenants/${tenantId}/logo`, formData).subscribe({
+      next: () => this.onSuccess(),
+      error: () => this.isSubmitting.set(false),
+    });
+  }
+
+  private onSuccess() {
+    this.isSubmitting.set(false);
+    this.showCreateModal.set(false);
+    this.loadData();
   }
 }

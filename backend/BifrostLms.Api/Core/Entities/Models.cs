@@ -27,6 +27,7 @@ public class Tenant
     public string Id { get; set; } = default!; // e.g., "tenant-1"
     public string Name { get; set; } = default!;
     public string? Domain { get; set; }
+    public string? LogoUrl { get; set; }
     public bool IsActive { get; set; } = true;
 }
 

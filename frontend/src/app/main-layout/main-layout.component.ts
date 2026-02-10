@@ -4,6 +4,8 @@ import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { AuthenticationService } from '../core/auth/auth.service';
 import { LanguageService } from '../core/language/language.service';
 import { TranslateModule } from '@ngx-translate/core';
+import { TenantService } from '../core/tenant/tenant.service';
+import { BASE_PATH } from '../api/variables';
 
 @Component({
   selector: 'app-main-layout',
@@ -15,18 +17,33 @@ import { TranslateModule } from '@ngx-translate/core';
       <header class="bg-white shadow-sm border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div class="flex items-center space-x-3 cursor-pointer" routerLink="/dashboard">
-            <div class="bg-indigo-600 rounded-lg p-2 shadow-lg shadow-indigo-100">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 4.168 6.253v13C4.168 19.333 5.477 19 7.5 19s3.332.333 4.168.618m4.332 0c.835-.285 1.668-.618 4.168-.618 1.667 0 3.253.477 3.253.618v-13C19.832 5.477 18.246 5 16.5 5c-1.668 0-3.253.477-4.168.618"
+            @if (tenantService.currentTenant()?.logoUrl) {
+              <div class="h-12 w-auto max-w-48 flex items-center justify-center overflow-hidden">
+                <img
+                  [src]="basePath + tenantService.currentTenant()?.logoUrl"
+                  class="h-full w-full object-contain"
                 />
-              </svg>
-            </div>
+              </div>
+            } @else {
+              <div class="bg-indigo-600 rounded-lg p-2 shadow-lg shadow-indigo-100">
+                <svg
+                  class="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 4.168 6.253v13C4.168 19.333 5.477 19 7.5 19s3.332.333 4.168.618m4.332 0c.835-.285 1.668-.618 4.168-.618 1.667 0 3.253.477 3.253.618v-13C19.832 5.477 18.246 5 16.5 5c-1.668 0-3.253.477-4.168.618"
+                  />
+                </svg>
+              </div>
+            }
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight italic">
-              Bifrost <span class="text-indigo-600">LMS</span>
+              {{ tenantService.currentTenant()?.name || 'Bifrost' }}
+              <span class="text-indigo-600">LMS</span>
             </h1>
           </div>
 
@@ -101,7 +118,9 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 export class MainLayoutComponent {
   authService = inject(AuthenticationService);
+  tenantService = inject(TenantService);
   languageService = inject(LanguageService);
+  basePath = inject(BASE_PATH);
   router = inject(Router);
 
   logout() {

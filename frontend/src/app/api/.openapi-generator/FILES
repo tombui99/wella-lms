@@ -11,12 +11,13 @@ api/quizzes.service.ts
 api/schedules.service.ts
 api/studentProgress.service.ts
 api/teacher.service.ts
+api/tenants.service.ts
 configuration.ts
 encoder.ts
 git_push.sh
 index.ts
+model/apiAdminTenantsIdLogoPostRequestLength.ts
 model/apiCoursesIdGetIdParameter.ts
-model/apiLessonsIdUploadPostRequestAllOfLength.ts
 model/batchUpdateChoiceDto.ts
 model/batchUpdateChoiceDtoId.ts
 model/batchUpdateQuestionDto.ts
