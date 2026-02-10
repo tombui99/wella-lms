@@ -41,7 +41,10 @@
     "LESSONS": "Bài học",
     "ADD_LESSON": "Thêm bài học",
     "TITLE": "Tiêu đề",
-    "QUIZ": "Trắc nghiệm"
+    "QUIZ": "Trắc nghiệm",
+    "STATUS": "Trạng thái",
+    "APPROVED": "Đã phê duyệt",
+    "DRAFT": "Bản nháp"
   },
   "DASHBOARD": {
     "WELCOME": "Chào mừng bạn quay lại",
@@ -79,7 +82,6 @@
     "WELCOME_BACK": "Chào mừng quay lại",
     "CREATE_ACCOUNT": "Tạo tài khoản",
     "FULL_NAME": "Họ và tên",
-    "USERNAME": "Tên đăng nhập",
     "SELECT_ROLE": "Tôi là...",
     "STUDENT": "Học sinh",
     "TEACHER": "Giáo viên",

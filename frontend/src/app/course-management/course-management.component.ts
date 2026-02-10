@@ -121,6 +121,11 @@ import { LanguageService } from '../core/language/language.service';
                   <th
                     class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]"
                   >
+                    {{ 'COMMON.STATUS' | translate }}
+                  </th>
+                  <th
+                    class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]"
+                  >
                     {{ 'COMMON.CREATED' | translate }}
                   </th>
                   <th
@@ -187,6 +192,37 @@ import { LanguageService } from '../core/language/language.service';
                         {{ course.description || ('COMMON.NO_DESCRIPTION' | translate) }}
                       </div>
                     </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center space-x-3">
+                        <button
+                          type="button"
+                          (click)="toggleApproval(course)"
+                          class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
+                          [class.bg-indigo-600]="course.isApproved"
+                          [class.bg-gray-200]="!course.isApproved"
+                          [title]="course.isApproved ? 'Unapprove' : 'Approve'"
+                        >
+                          <span
+                            class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                            [class.translate-x-4]="course.isApproved"
+                            [class.translate-x-0]="!course.isApproved"
+                          ></span>
+                        </button>
+                        @if (course.isApproved) {
+                          <span
+                            class="text-[10px] font-bold text-green-600 uppercase tracking-wider"
+                          >
+                            {{ 'COMMON.APPROVED' | translate }}
+                          </span>
+                        } @else {
+                          <span
+                            class="text-[10px] font-bold text-amber-600 uppercase tracking-wider"
+                          >
+                            {{ 'COMMON.DRAFT' | translate }}
+                          </span>
+                        }
+                      </div>
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {{ course.createdAt | date: 'short' }}
                     </td>
@@ -208,7 +244,7 @@ import { LanguageService } from '../core/language/language.service';
                   <!-- Lessons Accordion -->
                   @if (isExpanded(course.id!)) {
                     <tr>
-                      <td colspan="4" class="px-12 py-4 bg-gray-50/50">
+                      <td colspan="5" class="px-12 py-4 bg-gray-50/50">
                         <div class="flex justify-between items-center mb-6">
                           <h4 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em]">
                             {{ 'COMMON.LESSONS' | translate }} ({{ course.lessons?.length || 0 }})
@@ -566,6 +602,28 @@ export class CourseManagementComponent implements OnInit {
     imageUrl: '',
   });
 
+  toggleApproval(course: Course) {
+    if (!course.id) return;
+    const newStatus = !course.isApproved;
+
+    const updateData: UpdateCourseDto = {
+      title: course.title!,
+      description: course.description || null,
+      imageUrl: course.imageUrl || null,
+      isApproved: newStatus,
+    };
+
+    this.coursesService.apiCoursesIdPut(course.id, updateData).subscribe({
+      next: () => {
+        this.loadCourses();
+      },
+      error: (err) => {
+        this.error.set('Failed to update approval status.');
+        console.error('Error toggling approval:', err);
+      },
+    });
+  }
+
   ngOnInit() {
     this.loadCourses();
     const expandedId = this.route.snapshot.queryParamMap.get('expanded');
@@ -689,7 +747,7 @@ export class CourseManagementComponent implements OnInit {
     });
   }
 
-  updateFormField(field: keyof CourseFormData, value: string) {
+  updateFormField(field: keyof CourseFormData, value: any) {
     this.formData.update((prev) => ({ ...prev, [field]: value }));
   }
 
@@ -707,6 +765,7 @@ export class CourseManagementComponent implements OnInit {
         title: currentData.title,
         description: currentData.description || null,
         imageUrl: currentData.imageUrl || null,
+        isApproved: editing.isApproved || false, // Keep current status
       };
 
       this.coursesService.apiCoursesIdPut(editing.id!, updateData).subscribe({
@@ -727,6 +786,7 @@ export class CourseManagementComponent implements OnInit {
         title: currentData.title,
         description: currentData.description || null,
         imageUrl: currentData.imageUrl || null,
+        isApproved: false, // Default to false for new courses
       };
 
       this.coursesService.apiCoursesPost(createData).subscribe({

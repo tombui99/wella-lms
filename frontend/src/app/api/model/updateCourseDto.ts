@@ -13,5 +13,6 @@ export interface UpdateCourseDto {
     title: string;
     description: string | null;
     imageUrl: string | null;
+    isApproved: boolean;
 }
 

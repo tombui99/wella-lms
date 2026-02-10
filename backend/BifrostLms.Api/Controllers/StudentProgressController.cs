@@ -51,6 +51,7 @@ public class StudentProgressController : ControllerBase
         if (userId == null) return Unauthorized();
 
         var courses = await _context.Courses
+            .Where(c => c.IsApproved)
             .Include(c => c.Lessons.OrderBy(l => l.CreatedAt))
             .ToListAsync();
 
@@ -109,7 +110,7 @@ public class StudentProgressController : ControllerBase
 
         var course = await _context.Courses
             .Include(c => c.Lessons.OrderBy(l => l.CreatedAt))
-            .FirstOrDefaultAsync(c => c.Id == courseId);
+            .FirstOrDefaultAsync(c => c.Id == courseId && c.IsApproved);
 
         if (course == null) return NotFound("Course not found");
 

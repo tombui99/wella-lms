@@ -168,7 +168,7 @@ import { LanguageService } from '../core/language/language.service';
                                 >
                                   {{ p.studentName }}
                                 </div>
-                                <div class="text-xs text-gray-500">{{ p.studentEmail }}</div>
+                                <div class="text-xs text-gray-500">{{ p.studentUsername }}</div>
                               </div>
                             </div>
                           </td>

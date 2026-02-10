@@ -22,14 +22,28 @@ public class CoursesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Course>>> GetCourses()
     {
-        return await _context.Courses.Include(c => c.Lessons.OrderBy(l => l.CreatedAt)).ToListAsync();
+        var query = _context.Courses.Include(c => c.Lessons.OrderBy(l => l.CreatedAt)).AsQueryable();
+
+        if (User.IsInRole("Student"))
+        {
+            query = query.Where(c => c.IsApproved);
+        }
+
+        return await query.ToListAsync();
     }
 
     // GET: api/Courses/{id} - Public endpoint for all users
     [HttpGet("{id}")]
     public async Task<ActionResult<Course>> GetCourse(int id)
     {
-        var course = await _context.Courses.Include(c => c.Lessons.OrderBy(l => l.CreatedAt)).FirstOrDefaultAsync(c => c.Id == id);
+        var query = _context.Courses.Include(c => c.Lessons.OrderBy(l => l.CreatedAt)).AsQueryable();
+
+        if (User.IsInRole("Student"))
+        {
+            query = query.Where(c => c.IsApproved);
+        }
+
+        var course = await query.FirstOrDefaultAsync(c => c.Id == id);
 
         if (course == null)
         {
@@ -49,6 +63,7 @@ public class CoursesController : ControllerBase
             Title = dto.Title,
             Description = dto.Description,
             ImageUrl = dto.ImageUrl,
+            IsApproved = dto.IsApproved,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -73,6 +88,7 @@ public class CoursesController : ControllerBase
         course.Title = dto.Title;
         course.Description = dto.Description;
         course.ImageUrl = dto.ImageUrl;
+        course.IsApproved = dto.IsApproved;
         course.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();

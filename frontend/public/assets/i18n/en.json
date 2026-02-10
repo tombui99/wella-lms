@@ -41,7 +41,10 @@
     "LESSONS": "Lessons",
     "ADD_LESSON": "Add Lesson",
     "TITLE": "Title",
-    "QUIZ": "Quiz"
+    "QUIZ": "Quiz",
+    "STATUS": "Status",
+    "APPROVED": "Approved",
+    "DRAFT": "Draft"
   },
   "DASHBOARD": {
     "WELCOME": "Welcome back",
@@ -79,7 +82,6 @@
     "WELCOME_BACK": "Welcome Back",
     "CREATE_ACCOUNT": "Create Account",
     "FULL_NAME": "Full Name",
-    "USERNAME": "Username",
     "SELECT_ROLE": "I am a...",
     "STUDENT": "Student",
     "TEACHER": "Teacher",

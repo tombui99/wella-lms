@@ -36,6 +36,7 @@ public class Course : BaseEntity
     public string Title { get; set; } = default!;
     public string? Description { get; set; }
     public string? ImageUrl { get; set; }
+    public bool IsApproved { get; set; } = false;
     public List<Lesson> Lessons { get; set; } = new();
     public List<CourseTenant> SharedWithTenants { get; set; } = new();
 }

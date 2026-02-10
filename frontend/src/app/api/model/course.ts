@@ -16,6 +16,7 @@ export interface Course {
     title?: string;
     description?: string | null;
     imageUrl?: string | null;
+    isApproved?: boolean;
     lessons?: Array<Lesson>;
     sharedWithTenants?: Array<CourseTenant>;
     id?: ApiCoursesIdGetIdParameter;
