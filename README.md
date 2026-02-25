@@ -112,6 +112,12 @@ Bifrost LMS is a modern, multi-tenant SaaS learning platform built with .NET 10 
 
 ---
 
+## 🌐 Deployment
+
+For instructions on how to host this project on AWS and set up CI/CD, please refer to the [AWS Deployment Guide](README-DEPLOY.md).
+
+---
+
 ## 📐 Multi-Tenant Architecture
 
 The project is designed with a `BaseEntity` that includes a `TenantId`. This allows for data isolation across different tenants. The `Tenant` model in `Core/Entities` serves as the foundation for the multi-tenant SaaS configuration.

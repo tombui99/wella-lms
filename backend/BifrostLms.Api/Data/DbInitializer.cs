@@ -13,6 +13,9 @@ public static class DbInitializer
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+        // 0. Ensure database is created and migrations are applied
+        await context.Database.MigrateAsync();
+
         // 1. Seed Roles
         string[] roles = { "Admin", "Teacher", "Student" };
         foreach (var role in roles)
